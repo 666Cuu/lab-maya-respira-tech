@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Maya - Respira Tech: Dampak Asap Rokok & Tar</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        labDark: '#0b0f19',
+                        labPanel: '#1e293b',
+                        labAccent: '#06b6d4'
+                    },
+                    aspectRatio: {
+                        'video': '16 / 9',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .puff-active {
+            animation: puff-squeeze 0.25s ease-in-out;
+        }
+
+        @keyframes puff-squeeze {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.96); }
+            100% { transform: scale(1); }
+        }
+
+        /* Aspect ratio 16:9 frame styling */
+        .frame-16-9 {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between select-none">
+
+    <!-- Navigation Header -->
+    <header class="w-full glass-panel border-b border-slate-800 py-3 px-4 md:px-8 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('lamanMuka')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-flask-vial text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">
+                        Lab Maya - Respira Tech
+                    </h1>
+                    <p class="text-[11px] text-slate-400">Simulasi Dampak Asap Rokok, Vape & Endapan Tar</p>
+                </div>
+            </div>
+
+            <!-- Main Menu Tabs -->
+            <nav class="flex items-center bg-slate-900/90 p-1.5 rounded-xl border border-slate-800 text-xs font-semibold gap-1 overflow-x-auto max-w-full">
+                <button id="navBtnHome" onclick="switchMainTab('lamanMuka')" class="px-3.5 py-2 rounded-lg text-cyan-400 bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Laman Muka</span>
+                </button>
+                <button id="navBtnCPTP" onclick="switchMainTab('cptp')" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>CP & ATP</span>
+                </button>
+                <button id="navBtnSubstances" onclick="switchMainTab('kandunganZat')" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-skull-crossbones"></i>
+                    <span>Kandungan Zat</span>
+                </button>
+                <button id="navBtnGuide" onclick="switchMainTab('panduan')" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Panduan</span>
+                </button>
+                <button id="navBtnSim" onclick="switchMainTab('aktivitas')" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-vial-circle-check"></i>
+                    <span>Aktivitas Interaktif</span>
+                </button>
+                <button id="navBtnReflect" onclick="switchMainTab('refleksi')" class="px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Refleksi & Evaluasi</span>
+                </button>
+            </nav>
+
+            <!-- Quick Sound & Fullscreen Controls -->
+            <div class="hidden lg:flex items-center gap-2 text-xs">
+                <button id="btnSoundToggle" onclick="toggleSound()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center gap-1.5" title="Efek Suara">
+                    <i class="fa-solid fa-volume-high text-cyan-400"></i> Suara
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 1: LAMAN MUKA (HOME) -->
+    <section id="secLamanMuka" class="max-w-7xl w-full mx-auto p-4 md:p-8 flex-grow">
+        <!-- Hero Banner -->
+        <div class="glass-panel p-6 md:p-10 rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900/90 via-slate-900 to-cyan-950/40 relative overflow-hidden mb-8">
+            <div class="max-w-3xl space-y-4 relative z-10">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-3 py-1 bg-cyan-950 text-cyan-400 text-xs font-bold rounded-full border border-cyan-800 inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-atom"></i> Laboratorium Maya Biologi Sistem Pernapasan
+                    </span>
+                    <span class="px-3 py-1 bg-slate-800/90 text-slate-300 text-xs font-medium rounded-full border border-slate-700 inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-graduate text-cyan-400"></i> Pengembang: <strong class="text-white">Yoananda Ramadina Ananti, S.Pd</strong> (SMP Negeri 1 Dampit)
+                    </span>
+                </div>
+                <h2 class="text-3xl md:text-5xl font-black text-white leading-tight">
+                    Eksplorasi Dampak Asap Rokok & Tar Terhadap Paru-Paru
+                </h2>
+                <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+                    Selamat datang di <strong>Lab Maya - Respira Tech</strong>. Melalui laboratorium virtual ini, Anda dapat mensimulasikan mekanisme masuknya asap rokok konvensional, vapor (e-cigarette), serta asap rokok pasif ke dalam organ paru-paru manusia, mengamati akumulasi tar, pengecilan paru-paru, dan kerusakan alveolus.
+                </p>
+                <div class="pt-2 flex flex-wrap gap-4">
+                    <button onclick="switchMainTab('aktivitas')" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/25 transition flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> Mulai Aktivitas Eksperimen
+                    </button>
+                    <button onclick="switchMainTab('cptp')" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl border border-slate-700 transition flex items-center gap-2">
+                        <i class="fa-solid fa-graduation-cap text-cyan-400"></i> Lihat CP & ATP Pembelajaran
+                    </button>
+                </div>
+            </div>
+            <!-- Decorative Visual Background -->
+            <div class="absolute -right-10 -bottom-10 opacity-20 pointer-events-none text-cyan-500">
+                <i class="fa-solid fa-lungs text-[280px]"></i>
+            </div>
+        </div>
+
+        <!-- Learning Objectives Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
+            <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-cyan-950 text-cyan-400 flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-eye"></i>
+                </div>
+                <h3 class="font-bold text-white text-base">Visualisasi Endapan Tar</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Mengamati perubahan fisik warna jaringan paru-paru dari merah muda sehat menjadi cokelat hingga hitam akibat penumpukan residu tar.
+                </p>
+            </div>
+            <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-amber-950 text-amber-400 flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-code-compare"></i>
+                </div>
+                <h3 class="font-bold text-white text-base">Komparasi Skenario</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Membandingkan efek dari perokok aktif, perokok pasif, dan pengguna vape/e-cigarette dalam jangka waktu tertentu.
+                </p>
+            </div>
+            <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
+                <div class="w-10 h-10 rounded-xl bg-rose-950 text-rose-400 flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-microscope"></i>
+                </div>
+                <h3 class="font-bold text-white text-base">Analisis Mikroskopis</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Menganalisis dampak paparan zat kimia beracun terhadap kelumpuhan silia pembersih serta pecahnya kantung alveolus (emfisema).
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: MENU CP & ATP (CAPAIAN PEMBELAJARAN & ALUR TUJUAN PEMBELAJARAN) -->
+    <section id="secCPTP" class="hidden max-w-7xl w-full mx-auto p-4 md:p-8 flex-grow space-y-6">
+        
+        <!-- Header Banner -->
+        <div class="glass-panel p-6 rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900/90 via-slate-900 to-cyan-950/40">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-950 text-cyan-400 flex items-center justify-center text-2xl border border-cyan-800/50 shrink-0">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2">
+                        Capaian Pembelajaran (CP) & Alur Tujuan Pembelajaran (ATP)
+                    </h2>
+                    <p class="text-xs text-cyan-400">
+                        Kurikulum Merdeka • IPA Fase D (Kelas VIII SMP) • Sistem Pernapasan & Kesehatan Organ
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capaian Pembelajaran (CP) Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- CP Elemen Pemahaman IPA -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-brain"></i> Elemen Pemahaman IPA
+                    </span>
+                    <span class="px-2.5 py-0.5 bg-cyan-950 text-cyan-300 text-[10px] font-bold rounded-full border border-cyan-800">
+                        Fase D - Kelas VIII
+                    </span>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed italic bg-slate-900/70 p-3 rounded-xl border border-slate-800">
+                    "Peserta didik mampu menganalisis hubungan antara struktur dan fungsi organ pada sistem pernapasan manusia, serta menganalisis kelainan atau gangguan pada sistem pernapasan akibat paparan zat adiktif dan berbahaya (asap rokok konvensional, vapor/e-cigarette, dan zat iritan lingkungan) bagi kesehatan diri dan masyarakat."
+                </p>
+                <div class="text-[11px] text-slate-400 space-y-1">
+                    <strong class="text-slate-200 block"><i class="fa-solid fa-check-double text-cyan-400 mr-1"></i> Ruang Lingkup Materi Utama:</strong>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-400">
+                        <li>Struktur organ paru-paru, saluran pernapasan, silia, dan alveolus.</li>
+                        <li>Identifikasi zat berbahaya (Nikotin, Tar, Karbon Monoksida).</li>
+                        <li>Dampak paparan asap rokok aktif, vape, dan perokok pasif.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- CP Elemen Keterampilan Proses -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-microscope"></i> Elemen Keterampilan Proses
+                    </span>
+                    <span class="px-2.5 py-0.5 bg-amber-950 text-amber-300 text-[10px] font-bold rounded-full border border-amber-800">
+                        Inkuiri Digital
+                    </span>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed italic bg-slate-900/70 p-3 rounded-xl border border-slate-800">
+                    "Peserta didik melakukan penyelidikan berbasis laboratorium maya untuk mengamati, mengumpulkan data kuantitatif dan kualitatif, menganalisis perubahan fisiologis organ, serta mengevaluasi bukti ilmiah untuk menarik kesimpulan dan merefleksikan perilaku hidup sehat."
+                </p>
+                <div class="text-[11px] text-slate-400 space-y-1">
+                    <strong class="text-slate-200 block"><i class="fa-solid fa-gears text-amber-400 mr-1"></i> Aspek Keterampilan Sains:</strong>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-400">
+                        <li><strong>Mengamati & Memprediksi:</strong> Visualisasi endapan tar & silia.</li>
+                        <li><strong>Eksperimen Interaktif:</strong> Manipulasi jumlah hisapan & durasi.</li>
+                        <li><strong>Mengevaluasi & Refleksi:</strong> Analisis studi kasus & kuis kritis.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Tujuan Pembelajaran (TP) Grid -->
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-2">
+                <i class="fa-solid fa-bullseye"></i> Tujuan Pembelajaran (TP) Spesifik Laboratorium Maya
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                
+                <div class="p-4 bg-slate-900/90 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0">TP 1</span>
+                        <h4 class="font-bold text-white">Visualisasi & Kuantifikasi Endapan Tar</h4>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed">
+                        Peserta didik mampu **mengamati dan mengukur** akumulasi residu tar (mg/gram) serta perubahan warna organ paru-paru berdasarkan frekuensi hisapan dan kurun waktu paparan rokok.
+                    </p>
+                </div>
+
+                <div class="p-4 bg-slate-900/90 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0">TP 2</span>
+                        <h4 class="font-bold text-white">Komparasi Skenario Paparan</h4>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed">
+                        Peserta didik mampu **membandingkan perbedaan dampak** fisiologis antara perokok aktif (rokok konvensional), pengguna vape (e-cigarette), dan perokok pasif.
+                    </p>
+                </div>
+
+                <div class="p-4 bg-slate-900/90 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0">TP 3</span>
+                        <h4 class="font-bold text-white">Analisis Kerusakan Seluler (Silia & Alveolus)</h4>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed">
+                        Peserta didik mampu **menganalisis mekanisme mikroskopis** kelumpuhan rambut silia dan timbulnya kerusakan dinding alveolus (emfisema) akibat paparan zat beracun.
+                    </p>
+                </div>
+
+                <div class="p-4 bg-slate-900/90 rounded-xl border border-slate-800 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-[11px] shrink-0">TP 4</span>
+                        <h4 class="font-bold text-white">Refleksi Kritis & Pemecahan Studi Kasus</h4>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed">
+                        Peserta didik mampu **memecahkan masalah studi kasus nyata** kehidupan sehari-hari mengenai perokok kronis dan perokok pasif serta mengemukakan argumen pencegahan merokok.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Alur Tujuan Pembelajaran (ATP) - Timeline Steps -->
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-2">
+                <i class="fa-solid fa-route"></i> Alur Tujuan Pembelajaran (ATP) Tahapan Simulasi
+            </h3>
+
+            <div class="relative border-l-2 border-slate-800 ml-4 pl-6 space-y-6 text-xs">
+                
+                <!-- Step 1 -->
+                <div class="relative">
+                    <span class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-cyan-500 border-4 border-slate-900"></span>
+                    <h4 class="font-bold text-white text-sm">Tahap 1: Eksplorasi Kondisi Awal (Baseline Sehat)</h4>
+                    <p class="text-slate-400 mt-1">
+                        Siswa membuka simulasi, mengamati organ paru-paru normal (100% vitalitas, merah muda), gerakan silia aktif, dan kantung alveolus yang utuh sebagai kontrol eksperimen.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative">
+                    <span class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-cyan-500 border-4 border-slate-900"></span>
+                    <h4 class="font-bold text-white text-sm">Tahap 2: Pembuktian Kandungan Zat & Eksperimen Paparan</h4>
+                    <p class="text-slate-400 mt-1">
+                        Siswa mempelajari materi zat beracun (Nikotin, Tar, CO) di menu Kandungan Zat, kemudian mensimulasikan hisapan rokok manual/otomatis serta mengatur slider jangka waktu (1–40 tahun).
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative">
+                    <span class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-cyan-500 border-4 border-slate-900"></span>
+                    <h4 class="font-bold text-white text-sm">Tahap 3: Investigasi Mikroskopis Seluler</h4>
+                    <p class="text-slate-400 mt-1">
+                        Siswa mengaktifkan Mode Mikroskop untuk membandingkan pergerakan silia yang terlapisi tar serta pecahnya dinding alveolus pada penderita emfisema.
+                    </p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="relative">
+                    <span class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-amber-500 border-4 border-slate-900"></span>
+                    <h4 class="font-bold text-white text-sm">Tahap 4: Refleksi, Studi Kasus, & Evaluasi Formatif</h4>
+                    <p class="text-slate-400 mt-1">
+                        Siswa menganalisis studi kasus Pak Budi (perokok aktif) dan Rina (perokok pasif) serta menjawab kuis evaluasi pemahaman untuk mengukur pencapaian indikator.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <!-- SECTION NEW: MATERI KANDUNGAN ZAT BERBAHAYA -->
+    <section id="secKandunganZat" class="hidden max-w-7xl w-full mx-auto p-4 md:p-8 flex-grow space-y-6">
+        
+        <!-- Header Banner -->
+        <div class="glass-panel p-6 rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900/90 via-slate-900 to-rose-950/40">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-rose-950 text-rose-400 flex items-center justify-center text-2xl border border-rose-800/50 shrink-0">
+                    <i class="fa-solid fa-skull-crossbones"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2">
+                        Kandungan Zat Berbahaya pada Rokok & Vape
+                    </h2>
+                    <p class="text-xs text-rose-400">
+                        Materi Edukasi Kimia & Biologi • Memahami Toksisitas Komponen Asap & Dampaknya pada Tubuh
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 3 Primary Harmful Chemical Components -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- 1. NIKOTIN -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+                <div class="flex justify-between items-center">
+                    <span class="w-10 h-10 rounded-xl bg-purple-950 text-purple-400 flex items-center justify-center text-xl font-bold border border-purple-800">
+                        <i class="fa-solid fa-capsules"></i>
+                    </span>
+                    <span class="px-2.5 py-0.5 bg-purple-950 text-purple-300 text-[10px] font-bold rounded-full border border-purple-800">
+                        Zat Adiktif Utama
+                    </span>
+                </div>
+                <h3 class="text-lg font-bold text-white">Nikotin (Nicotine)</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Zat alkaloid neurotoksin berefek adiktif tinggi yang diserap cepat ke aliran darah menuju otak dalam hitungan detik.
+                </p>
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] space-y-1.5 text-slate-300">
+                    <strong class="text-purple-400 block"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Dampak Fisiologis:</strong>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-400">
+                        <li>Memicu kecanduan dan ketergantungan psikis/fisik.</li>
+                        <li>Penyempitan pembuluh darah (vasokonstriksi) & tekanan darah tinggi.</li>
+                        <li>Mempercepat detak jantung dan membebani kerja jantung.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 2. TAR -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+                <div class="flex justify-between items-center">
+                    <span class="w-10 h-10 rounded-xl bg-amber-950 text-amber-400 flex items-center justify-center text-xl font-bold border border-amber-800">
+                        <i class="fa-solid fa-droplet"></i>
+                    </span>
+                    <span class="px-2.5 py-0.5 bg-amber-950 text-amber-300 text-[10px] font-bold rounded-full border border-amber-800">
+                        Residu Lengket Karsinogenik
+                    </span>
+                </div>
+                <h3 class="text-lg font-bold text-white">Tar (Residu Tembakau)</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Kumpulan partikel padat lengket berwarna cokelat pekat hasil pembakaran tembakau yang mengandung ratusan senyawa kimia beracun.
+                </p>
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] space-y-1.5 text-slate-300">
+                    <strong class="text-amber-400 block"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Dampak Fisiologis:</strong>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-400">
+                        <li>Melapisi dan melumpuhkan gerak silia pembersih dahak.</li>
+                        <li>Mengendap permanen di alveolus paru-paru.</li>
+                        <li>Penyebab utama mutasi genetik & kanker paru-paru.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 3. KARBON MONOKSIDA -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
+                <div class="flex justify-between items-center">
+                    <span class="w-10 h-10 rounded-xl bg-rose-950 text-rose-400 flex items-center justify-center text-xl font-bold border border-rose-800">
+                        <i class="fa-solid fa-cloud"></i>
+                    </span>
+                    <span class="px-2.5 py-0.5 bg-rose-950 text-rose-300 text-[10px] font-bold rounded-full border border-rose-800">
+                        Gas Beracun (CO)
+                    </span>
+                </div>
+                <h3 class="text-lg font-bold text-white">Karbon Monoksida (CO)</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Gas tidak berwarna dan tidak berbau hasil pembakaran tidak sempurna yang mengikat Hemoglobin (Hb) jauh lebih kuat dibanding Oksigen.
+                </p>
+                <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] space-y-1.5 text-slate-300">
+                    <strong class="text-rose-400 block"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Dampak Fisiologis:</strong>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-400">
+                        <li>Daya ikat Hb-CO mencapai 200× lebih kuat dari Oksigen.</li>
+                        <li>Mengurangi suplai oksigen ke otak, jantung, dan otot.</li>
+                        <li>Menyebabkan pusing, sesak napas, hingga pingsan.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Secondary Chemicals Grid & Comparison Table -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Chemicals Catalog Grid -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-2">
+                    <i class="fa-solid fa-vial-circle-check"></i> Zat Beracun & Iritan Lainnya dalam Asap
+                </h3>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                        <span class="text-rose-400 font-bold block"><i class="fa-solid fa-flask mr-1"></i> Arsenik</span>
+                        <p class="text-[11px] text-slate-400">Racun racun yang biasa digunakan pada racun tikus dan pestisida.</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                        <span class="text-amber-400 font-bold block"><i class="fa-solid fa-biohazard mr-1"></i> Formaldehida</span>
+                        <p class="text-[11px] text-slate-400">Senyawa pengawet mayat (formalin) yang merusak sel mukosa pernapasan.</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                        <span class="text-purple-400 font-bold block"><i class="fa-solid fa-spray-can mr-1"></i> Amonia</span>
+                        <p class="text-[11px] text-slate-400">Gas pembersih lantai yang meningkatkan penyerapan nikotin di otak.</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                        <span class="text-cyan-400 font-bold block"><i class="fa-solid fa-car-battery mr-1"></i> Kadmium</span>
+                        <p class="text-[11px] text-slate-400">Logam berat beracun yang digunakan pada akumulator/baterai.</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                        <span class="text-emerald-400 font-bold block"><i class="fa-solid fa-gas-pump mr-1"></i> Benzena</span>
+                        <p class="text-[11px] text-slate-400">Senyawa hidrokarbon bahan bakar yang memicu kanker darah (leukemia).</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
+                        <span class="text-red-400 font-bold block"><i class="fa-solid fa-skull mr-1"></i> Hidrogen Sianida</span>
+                        <p class="text-[11px] text-slate-400">Gas racun mematikan yang merusak sistem enzim pernapasan sel.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Table: Konvensional vs Vape vs Pasif -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-2">
+                    <i class="fa-solid fa-code-compare"></i> Perbandingan Profil Kandungan Zat
+                </h3>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400">
+                                <th class="pb-2 font-semibold">Komponen / Zat</th>
+                                <th class="pb-2 font-semibold text-rose-400">Rokok Konvensional</th>
+                                <th class="pb-2 font-semibold text-purple-400">Vape / E-Cig</th>
+                                <th class="pb-2 font-semibold text-amber-400">Asap Pasif</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 text-[11px] text-slate-300">
+                            <tr>
+                                <td class="py-2.5 font-bold text-white">Nikotin</td>
+                                <td class="py-2.5 text-rose-300">Tinggi (Adiktif)</td>
+                                <td class="py-2.5 text-purple-300">Sangat Tinggi / Cair</td>
+                                <td class="py-2.5 text-amber-300">Sedang (Dihirup)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 font-bold text-white">Endapan Tar</td>
+                                <td class="py-2.5 text-rose-300">Sangat Tinggi (Pekat)</td>
+                                <td class="py-2.5 text-slate-500">Tidak Ada Tar*</td>
+                                <td class="py-2.5 text-amber-300">Partikel Terendap</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 font-bold text-white">Karbon Monoksida</td>
+                                <td class="py-2.5 text-rose-300">Tinggi (Pembakaran)</td>
+                                <td class="py-2.5 text-slate-500">Sangat Rendah</td>
+                                <td class="py-2.5 text-amber-300">Tinggi (Sidestream)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 font-bold text-white">Bahan Tambahan</td>
+                                <td class="py-2.5 text-rose-300">Tembakau & Cengkeh</td>
+                                <td class="py-2.5 text-purple-300">Propilen Glikol, Perasa</td>
+                                <td class="py-2.5 text-amber-300">Campuran Racun Bebas</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3 bg-purple-950/40 rounded-xl border border-purple-800/60 text-xs text-purple-200 leading-relaxed">
+                    <i class="fa-solid fa-circle-exclamation mr-1 text-purple-400"></i>
+                    <strong>Catatan Edukasi Vape:</strong> Meskipun Vape tidak menghasilkan endapan Tar dari pembakaran tembakau, aerosol vape mengandung nikotin konsentrasi tinggi, perasa kimia beracun, serta partikel logam mikro dari pemanasan kawat coil yang tetap merusak jaringan paru-paru.
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- SECTION 3: PANDUAN (GUIDE) -->
+    <section id="secPanduan" class="hidden max-w-7xl w-full mx-auto p-4 md:p-8 flex-grow space-y-6">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-book-open text-cyan-400"></i> Panduan Praktikum Virtual
+            </h2>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Panduan ini memuat tata cara pelaksanaan simulasi, pengenalan kontrol laboratorium, dan alur eksperimen langkah-demi-langkah.
+            </p>
+        </div>
+
+        <!-- Guide Steps Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column: Steps -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> Alur Tahapan Eksperimen
+                </h3>
+
+                <div class="space-y-3 text-xs">
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex gap-3">
+                        <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center shrink-0">1</span>
+                        <div>
+                            <strong class="text-white block">Langkah 1: Pengamatan Kondisi Awal (Baseline)</strong>
+                            <p class="text-slate-400">Amati struktur paru-paru sehat, ukuran 100%, kapasitas vital 100%, dan status silia pada posisi mikroskopis.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex gap-3">
+                        <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center shrink-0">2</span>
+                        <div>
+                            <strong class="text-white block">Langkah 2: Pemilihan Skenario Paparan</strong>
+                            <p class="text-slate-400">Pilih skenario perlakuan: Rokok Filter Konvensional, Vape / E-Cigarette, atau Perokok Pasif.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex gap-3">
+                        <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center shrink-0">3</span>
+                        <div>
+                            <strong class="text-white block">Langkah 3: Simulasi Hisapan & Kurun Waktu</strong>
+                            <p class="text-slate-400">Gunakan hisapan manual (+1 Batang, +1 Bungkus) atau gunakan Slider Tahun (1–40 Tahun) untuk mempercepat simulasi paparan.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 flex gap-3">
+                        <span class="w-6 h-6 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center shrink-0">4</span>
+                        <div>
+                            <strong class="text-white block">Langkah 4: Analisis Mikroskopis Seluler</strong>
+                            <p class="text-slate-400">Gunakan Mode Mikroskop untuk memeriksa kerusakan jaringan silia dan kantung alveolus internal organ secara mendalam.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Control Documentation -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad"></i> Penjelasan Tombol & Alat Virtual
+                </h3>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+                        <span class="text-amber-400 font-bold block mb-1"><i class="fa-solid fa-wind"></i> Hisap Rokok</span>
+                        <p class="text-slate-400 text-[11px]">Menghasilkan 1 hisapan asap rokok secara langsung ke saluran pernapasan.</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+                        <span class="text-cyan-400 font-bold block mb-1"><i class="fa-solid fa-sliders"></i> Pilih Skenario</span>
+                        <p class="text-slate-400 text-[11px]">Membandingkan perokok aktif, perokok pasif, dan pengguna vape.</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+                        <span class="text-indigo-400 font-bold block mb-1"><i class="fa-solid fa-microscope"></i> Zoom Mikroskop</span>
+                        <p class="text-slate-400 text-[11px]">Membuka jendela mikroskopis seluler untuk mengamati Silia dan Alveolus.</p>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+                        <span class="text-emerald-400 font-bold block mb-1"><i class="fa-solid fa-rotate-left"></i> Reset Per Langkah</span>
+                        <p class="text-slate-400 text-[11px]">Mengembalikan kondisi ke baseline awal tanpa menutup aplikasi.</p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-cyan-950/40 rounded-xl border border-cyan-800 text-xs text-cyan-200">
+                    <i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> <strong>Tips Navigasi Bebas:</strong> Anda dapat berpindah antar-langkah kapan saja menggunakan <strong>Indikator Progres Langkah</strong> di bagian atas area aktivitas.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: AKTIVITAS INTERAKTIF (16:9 CONTAINER & LAB SIMULATION) -->
+    <section id="secAktivitas" class="hidden max-w-7xl w-full mx-auto p-2 md:p-6 flex-grow flex flex-col gap-4">
+        
+        <!-- Wizard / Progress Indicator Bar -->
+        <div class="glass-panel p-3 rounded-2xl border border-slate-800 flex items-center justify-between overflow-x-auto gap-2 text-xs">
+            <span class="text-slate-400 font-bold whitespace-nowrap pl-2 hidden md:inline">
+                <i class="fa-solid fa-diagram-next text-cyan-400"></i> Tahapan:
+            </span>
+            
+            <div class="flex items-center gap-2 w-full justify-between max-w-4xl mx-auto">
+                <button id="stepBtn1" onclick="jumpToStep(1)" class="px-3 py-1.5 rounded-xl bg-cyan-600 text-white font-bold transition flex items-center gap-2 whitespace-nowrap shrink-0">
+                    <span class="w-5 h-5 rounded-full bg-cyan-900 text-cyan-200 text-[11px] flex items-center justify-center">1</span>
+                    <span>Kondisi Awal</span>
+                </button>
+                <div class="h-0.5 w-8 bg-slate-800 shrink-0"></div>
+
+                <button id="stepBtn2" onclick="jumpToStep(2)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 font-semibold transition flex items-center gap-2 whitespace-nowrap shrink-0 hover:text-white">
+                    <span class="w-5 h-5 rounded-full bg-slate-700 text-slate-300 text-[11px] flex items-center justify-center">2</span>
+                    <span>Pilih Skenario</span>
+                </button>
+                <div class="h-0.5 w-8 bg-slate-800 shrink-0"></div>
+
+                <button id="stepBtn3" onclick="jumpToStep(3)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 font-semibold transition flex items-center gap-2 whitespace-nowrap shrink-0 hover:text-white">
+                    <span class="w-5 h-5 rounded-full bg-slate-700 text-slate-300 text-[11px] flex items-center justify-center">3</span>
+                    <span>Simulasi Paparan</span>
+                </button>
+                <div class="h-0.5 w-8 bg-slate-800 shrink-0"></div>
+
+                <button id="stepBtn4" onclick="jumpToStep(4)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 font-semibold transition flex items-center gap-2 whitespace-nowrap shrink-0 hover:text-white">
+                    <span class="w-5 h-5 rounded-full bg-slate-700 text-slate-300 text-[11px] flex items-center justify-center">4</span>
+                    <span>Mode Mikroskop</span>
+                </button>
+            </div>
+
+            <button onclick="resetSimulation()" class="px-3 py-1.5 bg-rose-950/80 hover:bg-rose-900 text-rose-300 font-bold rounded-xl border border-rose-800/60 transition flex items-center gap-1.5 whitespace-nowrap shrink-0" title="Reset Total">
+                <i class="fa-solid fa-rotate-left"></i> <span class="hidden md:inline">Reset</span>
+            </button>
+        </div>
+
+        <!-- Main Interactive Area: Grid Workspace -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- LEFT PANEL: Dynamic Control Deck (4 Cols) -->
+            <div class="lg:col-span-4 space-y-4 flex flex-col justify-between">
+                
+                <!-- Card 1: Scenario & Action Controls -->
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <h3 class="font-bold text-slate-200 text-xs uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-cyan-400"></i> Kontrol Eksperimen
+                        </h3>
+                        <span id="currentScenarioBadge" class="text-[10px] bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-800 font-bold">
+                            Rokok Filter
+                        </span>
+                    </div>
+
+                    <!-- Scenario Selector -->
+                    <div class="space-y-1.5">
+                        <label for="selectScenario" class="text-[11px] text-slate-400 font-semibold block">Skenario Perlakuan:</label>
+                        <select id="selectScenario" onchange="changeScenario(this.value)" class="w-full bg-slate-900 text-slate-200 text-xs rounded-xl p-2.5 border border-slate-700 focus:outline-none focus:border-cyan-500 font-semibold">
+                            <option value="conventional">🚬 Perokok Aktif (Rokok Konvensional)</option>
+                            <option value="vape">💨 Pengguna Vape / E-Cigarette (Uap Nikotin)</option>
+                            <option value="passive">😷 Perokok Pasif (Asap Sampingan / Secondhand)</option>
+                        </select>
+                    </div>
+
+                    <!-- Main Puff Action Button -->
+                    <button id="btnPuff" onclick="triggerPuff(1)" class="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 hover:from-amber-400 hover:to-red-500 text-white font-extrabold rounded-xl shadow-lg shadow-orange-600/30 active:scale-95 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wind"></i>
+                        <span id="lblPuffBtn">TEKAN / HISAP ROKOK (+1)</span>
+                    </button>
+
+                    <!-- Fast Acceleration Buttons -->
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button onclick="triggerPuff(10)" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-smoking text-amber-500"></i> +1 Batang
+                        </button>
+                        <button onclick="triggerPuff(50)" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-box text-red-400"></i> +1 Bungkus
+                        </button>
+                    </div>
+
+                    <!-- Long-term Time Slider -->
+                    <div class="space-y-2 pt-3 border-t border-slate-800">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                                <i class="fa-solid fa-calendar-days"></i> Lama Waktu Paparan:
+                            </span>
+                            <span id="yearSliderVal" class="text-xs font-black text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
+                                0 Tahun
+                            </span>
+                        </div>
+                        <input type="range" id="sliderYears" min="0" max="40" value="0" step="1" oninput="onYearSliderChange(this.value)" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>0 Thn</span>
+                            <span>10 Thn</span>
+                            <span>25 Thn</span>
+                            <span>40 Thn</span>
+                        </div>
+                    </div>
+
+                    <!-- Auto Puff Toggle Switch -->
+                    <div class="flex items-center justify-between p-2.5 bg-slate-900/80 rounded-xl border border-slate-800">
+                        <span class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate text-cyan-400"></i> Hisap Otomatis
+                        </span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleAutoPuff" onchange="toggleAutoPuffState(this.checked)" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Indicators & Quantitative Health Panel -->
+                <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-3">
+                    <h3 class="font-bold text-slate-200 text-xs uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-cyan-400"></i> Indikator Kuantitatif
+                    </h3>
+
+                    <!-- Health Vital Bar -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">Kapasitas Vital Paru:</span>
+                            <span id="healthPercentText" class="font-bold text-emerald-400">100%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                            <div id="healthBar" class="h-full bg-gradient-to-r from-emerald-500 via-yellow-500 to-red-600 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Lung Shrinkage Bar -->
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">Ukuran Paru-Paru:</span>
+                            <span id="lungSizePercentText" class="font-bold text-cyan-400">100% (Normal)</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                            <div id="lungSizeBar" class="h-full bg-cyan-500 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Micro Metric Badges -->
+                    <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-400 block">Endapan Tar / Residu:</span>
+                            <span id="tarVolumeText" class="font-bold text-amber-400">0.0 mg</span>
+                        </div>
+                        <div class="bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-400 block">Kondisi Alveolus:</span>
+                            <span id="alveoliStatusText" class="font-bold text-emerald-400">Sehat & Utuh</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CENTER PANEL: Standard 16:9 Aspect Ratio Canvas Viewport (8 Cols) -->
+            <div class="lg:col-span-8 flex flex-col space-y-4">
+                
+                <!-- Main Frame 16:9 Viewport Container -->
+                <div class="glass-panel p-3 rounded-2xl border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+                    
+                    <!-- Viewport Header Overlay -->
+                    <div class="flex justify-between items-center z-10 mb-2 px-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                            <span class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Visualisasi Paru-Paru</span>
+                        </div>
+
+                        <!-- Interactive Tool Buttons -->
+                        <div class="flex gap-2">
+                            <button id="btnMicroscopeToggle" onclick="toggleMicroscopeModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-semibold rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-microscope"></i> Mode Mikroskop
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 16:9 Simulation Canvas Container -->
+                    <div class="relative w-full frame-16-9 bg-slate-950 rounded-xl overflow-hidden border border-slate-800/80 flex items-center justify-center">
+                        <canvas id="simCanvas" class="w-full h-full block cursor-pointer"></canvas>
+
+                        <!-- Microscope Modal (Cilia & Alveolus) -->
+                        <div id="microscopeModal" class="hidden absolute inset-0 bg-slate-950/95 backdrop-blur-md p-5 flex flex-col justify-between z-20">
+                            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                                <div class="flex items-center gap-3">
+                                    <h4 class="font-bold text-cyan-400 text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-microscope"></i> Tampilan Mikroskopis Seluler
+                                    </h4>
+                                    <!-- View Tabs -->
+                                    <div class="flex bg-slate-900 rounded-lg p-0.5 border border-slate-800 text-[11px]">
+                                        <button id="microTabCilia" onclick="switchMicroTab('cilia')" class="px-2.5 py-1 rounded-md bg-cyan-600 text-white font-semibold transition">
+                                            Silia Saluran Napas
+                                        </button>
+                                        <button id="microTabAlveolus" onclick="switchMicroTab('alveolus')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition">
+                                            Kantung Alveolus
+                                        </button>
+                                    </div>
+                                </div>
+                                <button onclick="toggleMicroscopeModal()" class="text-slate-400 hover:text-white">
+                                    <i class="fa-solid fa-xmark text-lg"></i>
+                                </button>
+                            </div>
+
+                            <!-- Microscope Render Container -->
+                            <div class="flex-grow flex flex-col items-center justify-center my-2">
+                                <canvas id="microCanvas" width="480" height="200" class="w-full max-w-[480px] h-[190px] bg-slate-900 rounded-xl border border-slate-800 shadow-inner"></canvas>
+                                
+                                <div class="mt-2 text-center max-w-lg">
+                                    <span id="microStatusBadge" class="inline-block px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 mb-1">
+                                        Silia Aktif & Sehat
+                                    </span>
+                                    <p id="microDesc" class="text-xs text-slate-300 leading-relaxed">
+                                        Silia adalah rambut-rambut halus yang bergerak menyapu dahak dan kotoran. Tar melapisi silia hingga melambat dan lumpuh total.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="text-[10px] text-slate-500 text-center border-t border-slate-800/80 pt-2">
+                                Gunakan tombol tab mikroskop di atas untuk mengamati perbedaan jaringan Silia dan Alveolus.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Dynamic Explanation Footer Box -->
+                    <div class="mt-3 p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-start gap-2.5">
+                        <i class="fa-solid fa-circle-info text-cyan-400 text-sm mt-0.5"></i>
+                        <p id="liveDynamicAdvice" class="leading-relaxed">
+                            <strong>Kondisi Normal:</strong> Paru-paru berwarna merah muda, berukuran 100%, dan bebas dari endapan zat beracun. Alveolus dapat mengikat oksigen secara efisien.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 5: REFLEKSI & EVALUASI (STUDI KASUS & SOAL PENERAPAN) -->
+    <section id="secRefleksi" class="hidden max-w-7xl w-full mx-auto p-4 md:p-8 flex-grow space-y-6">
+        
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+            <h2 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-cyan-400"></i> Studi Kasus, Refleksi & Evaluasi
+            </h2>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Terapkan pemahaman yang diperoleh dari eksperimen simulasi untuk memecahkan studi kasus dunia nyata dan menjawab pertanyaan evaluasi reflektif.
+            </p>
+        </div>
+
+        <!-- Case Studies Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Case Study 1 -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3">
+                <span class="px-2.5 py-1 bg-amber-950 text-amber-400 text-xs font-bold rounded-lg border border-amber-800 inline-block">
+                    Studi Kasus 1: Perokok Kronis (Pak Budi, 48 Thn)
+                </span>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Pak Budi telah merokok 1 bungkus per hari selama 20 tahun. Belakangan ini ia sering mengalami batuk berdahak di pagi hari dan merasa napasnya makin pendek saat menaiki tangga.
+                </p>
+                
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-xs space-y-2">
+                    <strong class="text-cyan-400 block">Pertanyaan Analisis:</strong>
+                    <p class="text-slate-300">
+                        Berdasarkan hasil simulasi mikroskopis dan endapan tar, mengapa Pak Budi mengalami batuk berdahak kronis dan sesak napas?
+                    </p>
+                    <textarea id="answerCase1" rows="3" placeholder="Tuliskan analisis Anda berdasarkan peranan silia dan kapasitas vital paru..." class="w-full bg-slate-950 text-slate-200 p-2.5 rounded-lg border border-slate-700 text-xs focus:outline-none focus:border-cyan-500"></textarea>
+                    <button onclick="checkCaseHint(1)" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg text-xs transition">
+                        Periksa Petunjuk Kunci
+                    </button>
+                    <div id="hintCase1" class="hidden p-2.5 bg-cyan-950/60 rounded-lg border border-cyan-800 text-[11px] text-cyan-200">
+                        <strong>Petunjuk Jawaban:</strong> Tar melapisi dan melumpuhkan silia sehingga dahak/kotoran tidak bisa disapu keluar (memicu batuk refleks). Pengecilan kapasitas paru dan pecahnya dinding alveolus mengurangi penyerapan O2 sehingga mudah sesak napas.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Case Study 2 -->
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-3">
+                <span class="px-2.5 py-1 bg-rose-950 text-rose-400 text-xs font-bold rounded-lg border border-rose-800 inline-block">
+                    Studi Kasus 2: Perokok Pasif (Rina, 16 Thn)
+                </span>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Rina tidak pernah merokok, namun ayahnya sering merokok di dalam ruang keluarga. Rina sering mengalami iritasi tenggorokan dan gejala asma yang sering kambuh.
+                </p>
+
+                <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-xs space-y-2">
+                    <strong class="text-cyan-400 block">Pertanyaan Analisis:</strong>
+                    <p class="text-slate-300">
+                        Bandingkan skenario Perokok Pasif pada simulasi. Mengapa seseorang yang tidak merokok tetap mengalami penurunan kesehatan paru?
+                    </p>
+                    <textarea id="answerCase2" rows="3" placeholder="Tuliskan analisis Anda mengenai asap sampingan (sidestream smoke)..." class="w-full bg-slate-950 text-slate-200 p-2.5 rounded-lg border border-slate-700 text-xs focus:outline-none focus:border-cyan-500"></textarea>
+                    <button onclick="checkCaseHint(2)" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg text-xs transition">
+                        Periksa Petunjuk Kunci
+                    </button>
+                    <div id="hintCase2" class="hidden p-2.5 bg-cyan-950/60 rounded-lg border border-cyan-800 text-[11px] text-cyan-200">
+                        <strong>Petunjuk Jawaban:</strong> Asap sampingan (sidestream smoke) mengandung zat iritan dan racun nikotin yang dihirup perokok pasif, menyebabkan akumulasi partikel beracun di paru-paru meskipun dalam kadar lebih sedikit.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Interactive Quiz Box -->
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-emerald-400"></i> Kuis Penerapan Interaktif
+            </h3>
+
+            <!-- Quiz Q1 -->
+            <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 text-xs">
+                <p class="font-bold text-slate-200">1. Zat beracun dalam asap rokok yang mengendap menjadi residu cair lengket berwarna cokelat/kuning pekat adalah...</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                    <button onclick="answerQuiz(1, 'A')" class="quiz-btn-1 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">A. Nikotin</button>
+                    <button onclick="answerQuiz(1, 'B')" class="quiz-btn-1 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">B. Tar</button>
+                    <button onclick="answerQuiz(1, 'C')" class="quiz-btn-1 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">C. Karbon Monoksida</button>
+                    <button onclick="answerQuiz(1, 'D')" class="quiz-btn-1 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">D. Oksigen</button>
+                </div>
+                <p id="quizFeedback1" class="hidden font-bold pt-1"></p>
+            </div>
+
+            <!-- Quiz Q2 -->
+            <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 text-xs">
+                <p class="font-bold text-slate-200">2. Dampak utama kelumpuhan rambut-rambut halus (silia) pada saluran pernapasan akibat lapisan tar adalah...</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                    <button onclick="answerQuiz(2, 'A')" class="quiz-btn-2 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">A. Paru-paru membesar hingga 200%</button>
+                    <button onclick="answerQuiz(2, 'B')" class="quiz-btn-2 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">B. Hilangnya kemampuan menyapu kotoran & dahak keluar</button>
+                    <button onclick="answerQuiz(2, 'C')" class="quiz-btn-2 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">C. Penyerapan O2 meningkat pesat</button>
+                    <button onclick="answerQuiz(2, 'D')" class="quiz-btn-2 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">D. Pembuluh darah paru menjadi lentur</button>
+                </div>
+                <p id="quizFeedback2" class="hidden font-bold pt-1"></p>
+            </div>
+
+            <!-- Quiz Q3 -->
+            <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 text-xs">
+                <p class="font-bold text-slate-200">3. Apa yang terjadi pada kantung alveolus penderita emfisema akibat paparan asap rokok jangka panjang?</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                    <button onclick="answerQuiz(3, 'A')" class="quiz-btn-3 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">A. Dinding sekat alveolus pecah & merusak luas permukaan penyerapan oksigen</button>
+                    <button onclick="answerQuiz(3, 'B')" class="quiz-btn-3 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">B. Jumlah alveolus bertambah dua kali lipat</button>
+                    <button onclick="answerQuiz(3, 'C')" class="quiz-btn-3 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">C. Alveolus menghasilkan molekul hemoglobin sendiri</button>
+                    <button onclick="answerQuiz(3, 'D')" class="quiz-btn-3 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">D. Elastisitas alveolus menjadi sangat lentur dan kuat</button>
+                </div>
+                <p id="quizFeedback3" class="hidden font-bold pt-1"></p>
+            </div>
+
+            <!-- Quiz Q4 -->
+            <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 text-xs">
+                <p class="font-bold text-slate-200">4. Mengapa seseorang yang merupakan perokok pasif tetap memiliki risiko tinggi terhadap penyakit paru-paru?</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                    <button onclick="answerQuiz(4, 'A')" class="quiz-btn-4 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">A. Asap sampingan (sidestream smoke) tetap mengandung racun kimia dan tar yang dihirup ke paru-paru</button>
+                    <button onclick="answerQuiz(4, 'B')" class="quiz-btn-4 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">B. Perokok pasif tidak memiliki organ hati untuk menawar racun</button>
+                    <button onclick="answerQuiz(4, 'C')" class="quiz-btn-4 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">C. Karena paru-paru perokok pasif berukuran lebih kecil sejak lahir</button>
+                    <button onclick="answerQuiz(4, 'D')" class="quiz-btn-4 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">D. Racun rokok hanya diserap melalui pori-pori kulit luar</button>
+                </div>
+                <p id="quizFeedback4" class="hidden font-bold pt-1"></p>
+            </div>
+
+            <!-- Quiz Q5 -->
+            <div class="p-4 bg-slate-900/80 rounded-xl border border-slate-800 space-y-2 text-xs">
+                <p class="font-bold text-slate-200">5. Gas beracun dalam asap rokok yang mengikat hemoglobin darah lebih kuat daripada oksigen sehingga mengurangi suplai O2 ke tubuh adalah...</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                    <button onclick="answerQuiz(5, 'A')" class="quiz-btn-5 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">A. Nitrogen (N2)</button>
+                    <button onclick="answerQuiz(5, 'B')" class="quiz-btn-5 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">B. Karbon Monoksida (CO)</button>
+                    <button onclick="answerQuiz(5, 'C')" class="quiz-btn-5 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">C. Karbon Dioksida (CO2)</button>
+                    <button onclick="answerQuiz(5, 'D')" class="quiz-btn-5 border border-slate-700 p-2 rounded-lg text-left hover:bg-slate-800 transition">D. Hidrogen (H2)</button>
+                </div>
+                <p id="quizFeedback5" class="hidden font-bold pt-1"></p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Footer -->
+    <footer class="w-full glass-panel border-t border-slate-800 py-3 px-6 text-center text-xs text-slate-500">
+        <p>© 2026 Lab Maya - Respira Tech • Dikembangkan oleh <strong class="text-slate-300">Yoananda Ramadina Ananti, S.Pd</strong> (SMP Negeri 1 Dampit) • Media Pembelajaran Virtual Biologi Sistem Pernapasan</p>
+    </footer>
+
+    <script>
+        /* 
+           RESPIRA-LAB CORE ENGINE
+           Manages tabs, 16:9 canvas rendering, scenario states, particle physics,
+           interactive modal explorations, step wizard navigation, audio synthesis.
+        */
+
+        // App States
+        let currentScenario = 'conventional'; // 'conventional', 'vape', 'passive'
+        let currentStep = 1;
+        let totalPuffs = 0;
+        let totalCigarettes = 0;
+        let yearsSmoked = 0;
+        let healthPercentage = 100;
+        let lungSizeScale = 1.0;
+        let tarAccumulatedMg = 0;
+        let isAutoPuffing = false;
+        let autoPuffInterval = null;
+        let soundEnabled = true;
+        let breathePhase = 0;
+        let smokeParticles = [];
+        let tarDeposits = [];
+        let activeMicroTab = 'cilia';
+        let audioCtx = null;
+        let canvas, ctx, microCanvas, microCtx;
+
+        // Step Progress Wizard
+        function jumpToStep(stepNum) {
+            currentStep = stepNum;
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`stepBtn${i}`);
+                if (btn) {
+                    if (i === stepNum) {
+                        btn.className = "px-3 py-1.5 rounded-xl bg-cyan-600 text-white font-bold transition flex items-center gap-2 whitespace-nowrap shrink-0";
+                    } else {
+                        btn.className = "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 font-semibold transition flex items-center gap-2 whitespace-nowrap shrink-0 hover:text-white";
+                    }
+                }
+            }
+
+            if (stepNum === 1) {
+                resetSimulation();
+            } else if (stepNum === 2) {
+                document.getElementById('selectScenario').focus();
+            } else if (stepNum === 3) {
+                triggerPuff(5);
+            } else if (stepNum === 4) {
+                const modal = document.getElementById('microscopeModal');
+                if (modal && modal.classList.contains('hidden')) {
+                    toggleMicroscopeModal();
+                }
+            }
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playPuffSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const bufferSize = audioCtx.sampleRate * 0.25;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(350, audioCtx.currentTime);
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                noise.start();
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('btnSoundToggle');
+            btn.innerHTML = soundEnabled 
+                ? '<i class="fa-solid fa-volume-high text-cyan-400"></i> Suara' 
+                : '<i class="fa-solid fa-volume-xmark text-rose-400"></i> Mute';
+        }
+
+        // Navigation Tabs Switcher
+        function switchMainTab(tabName) {
+            document.getElementById('secLamanMuka').classList.add('hidden');
+            document.getElementById('secCPTP').classList.add('hidden');
+            document.getElementById('secKandunganZat').classList.add('hidden');
+            document.getElementById('secPanduan').classList.add('hidden');
+            document.getElementById('secAktivitas').classList.add('hidden');
+            document.getElementById('secRefleksi').classList.add('hidden');
+
+            document.getElementById('navBtnHome').className = "px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap";
+            document.getElementById('navBtnCPTP').className = "px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap";
+            document.getElementById('navBtnSubstances').className = "px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap";
+            document.getElementById('navBtnGuide').className = "px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap";
+            document.getElementById('navBtnSim').className = "px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap";
+            document.getElementById('navBtnReflect').className = "px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 whitespace-nowrap";
+
+            if (tabName === 'lamanMuka') {
+                document.getElementById('secLamanMuka').classList.remove('hidden');
+                document.getElementById('navBtnHome').className = "px-3.5 py-2 rounded-lg text-cyan-400 bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap font-bold";
+            } else if (tabName === 'cptp') {
+                document.getElementById('secCPTP').classList.remove('hidden');
+                document.getElementById('navBtnCPTP').className = "px-3.5 py-2 rounded-lg text-cyan-400 bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap font-bold";
+            } else if (tabName === 'kandunganZat') {
+                document.getElementById('secKandunganZat').classList.remove('hidden');
+                document.getElementById('navBtnSubstances').className = "px-3.5 py-2 rounded-lg text-cyan-400 bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap font-bold";
+            } else if (tabName === 'panduan') {
+                document.getElementById('secPanduan').classList.remove('hidden');
+                document.getElementById('navBtnGuide').className = "px-3.5 py-2 rounded-lg text-cyan-400 bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap font-bold";
+            } else if (tabName === 'aktivitas') {
+                document.getElementById('secAktivitas').classList.remove('hidden');
+                document.getElementById('navBtnSim').className = "px-3.5 py-2 rounded-lg text-cyan-400 bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap font-bold";
+                resizeCanvas();
+            } else if (tabName === 'refleksi') {
+                document.getElementById('secRefleksi').classList.remove('hidden');
+                document.getElementById('navBtnReflect').className = "px-3.5 py-2 rounded-lg text-cyan-400 bg-slate-800 transition flex items-center gap-1.5 whitespace-nowrap font-bold";
+            }
+        }
+
+        function changeScenario(val) {
+            currentScenario = val;
+            const badge = document.getElementById('currentScenarioBadge');
+            const lblPuffBtn = document.getElementById('lblPuffBtn');
+
+            if (val === 'conventional') {
+                badge.textContent = "Rokok Filter";
+                badge.className = "text-[10px] bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-800 font-bold";
+                lblPuffBtn.textContent = "TEKAN / HISAP ROKOK (+1)";
+            } else if (val === 'vape') {
+                badge.textContent = "Vape / E-Cig";
+                badge.className = "text-[10px] bg-purple-950 text-purple-400 px-2 py-0.5 rounded-full border border-purple-800 font-bold";
+                lblPuffBtn.textContent = "HISAP UAP VAPE (+1)";
+            } else if (val === 'passive') {
+                badge.textContent = "Perokok Pasif";
+                badge.className = "text-[10px] bg-rose-950 text-rose-400 px-2 py-0.5 rounded-full border border-rose-800 font-bold";
+                lblPuffBtn.textContent = "HIRUP ASAP PASIF (+1)";
+            }
+
+            resetSimulation();
+        }
+
+        function resizeCanvas() {
+            if (canvas && canvas.parentElement) {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        class SmokeParticle {
+            constructor(x, y, targetX, targetY, colorType) {
+                this.x = x;
+                this.y = y;
+                this.startX = x;
+                this.startY = y;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.colorType = colorType;
+                
+                this.progress = 0;
+                this.speed = 0.015 + Math.random() * 0.01;
+                this.size = 3 + Math.random() * 5;
+                this.alpha = 0.7 + Math.random() * 0.3;
+                this.curveOffset = (Math.random() - 0.5) * 40;
+            }
+
+            update() {
+                this.progress += this.speed;
+                const midX = (this.startX + this.targetX) / 2 + this.curveOffset;
+                const midY = (this.startY + this.targetY) / 2 - 20;
+
+                const t = this.progress;
+                this.x = (1 - t) * (1 - t) * this.startX + 2 * (1 - t) * t * midX + t * t * this.targetX;
+                this.y = (1 - t) * (1 - t) * this.startY + 2 * (1 - t) * t * midY + t * t * this.targetY;
+
+                this.size += 0.12;
+                if (this.progress >= 1) {
+                    this.alpha -= 0.05;
+                }
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                
+                if (this.colorType === 'vape') {
+                    ctx.fillStyle = `rgba(230, 210, 255, ${Math.max(0, this.alpha)})`;
+                } else if (this.colorType === 'passive') {
+                    ctx.fillStyle = `rgba(200, 190, 170, ${Math.max(0, this.alpha)})`;
+                } else {
+                    ctx.fillStyle = healthPercentage > 60 
+                        ? `rgba(220, 225, 230, ${Math.max(0, this.alpha)})`
+                        : `rgba(180, 120, 50, ${Math.max(0, this.alpha)})`;
+                }
+                
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function triggerPuff(count = 1) {
+            playPuffSound();
+
+            for (let c = 0; c < count; c++) {
+                totalPuffs++;
+                totalCigarettes = (totalPuffs / 10);
+
+                let tarMultiplier = 1.2;
+                if (currentScenario === 'vape') tarMultiplier = 0.2;
+                if (currentScenario === 'passive') tarMultiplier = 0.5;
+
+                tarAccumulatedMg += tarMultiplier;
+                
+                const damageFactor = (currentScenario === 'vape' ? 0.6 : currentScenario === 'passive' ? 0.8 : 1.8);
+                healthPercentage = Math.max(0, 100 - (totalPuffs * damageFactor));
+                lungSizeScale = Math.max(0.70, 1.0 - (totalPuffs * 0.005 * damageFactor));
+
+                if (canvas) {
+                    const w = canvas.width;
+                    const h = canvas.height;
+                    const cigX = w * 0.15;
+                    const cigY = h * 0.75;
+                    const centerLungX = w * 0.60;
+                    const centerLungY = h * 0.48;
+
+                    for (let i = 0; i < 12; i++) {
+                        setTimeout(() => {
+                            smokeParticles.push(new SmokeParticle(
+                                cigX, cigY, 
+                                centerLungX + (Math.random() - 0.5) * 60, 
+                                centerLungY - 60 + (Math.random() - 0.5) * 40,
+                                currentScenario
+                            ));
+                        }, i * 20);
+                    }
+                }
+            }
+
+            // Populate tar spots
+            if (tarDeposits.length < 150 && currentScenario !== 'vape') {
+                tarDeposits.push({
+                    x: (Math.random() < 0.5 ? -1 : 1) * (15 + Math.random() * 55),
+                    y: -25 + Math.random() * 100,
+                    radius: 2 + Math.random() * 10
+                });
+            }
+
+            updateUI();
+        }
+
+        function onYearSliderChange(val) {
+            yearsSmoked = parseInt(val);
+            document.getElementById('yearSliderVal').textContent = `${yearsSmoked} Tahun`;
+            
+            if (yearsSmoked === 0) {
+                resetSimulation();
+                return;
+            }
+
+            // Calculate impact from years
+            totalCigarettes = yearsSmoked * 365 * 12;
+            totalPuffs = totalCigarettes * 10;
+            tarAccumulatedMg = totalCigarettes * 12;
+
+            const exposure = (totalCigarettes / 4000);
+            healthPercentage = Math.max(0, 100 - (exposure * 25));
+            lungSizeScale = Math.max(0.70, 1.0 - (exposure * 0.08));
+
+            // Populate tar spots
+            tarDeposits = [];
+            const spotCount = Math.min(180, Math.floor(exposure * 40));
+            for (let s = 0; s < spotCount; s++) {
+                tarDeposits.push({
+                    x: (Math.random() < 0.5 ? -1 : 1) * (15 + Math.random() * 60),
+                    y: -30 + Math.random() * 110,
+                    radius: 3 + Math.random() * 12
+                });
+            }
+
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('healthPercentText').textContent = `${Math.round(healthPercentage)}%`;
+            document.getElementById('healthBar').style.width = `${healthPercentage}%`;
+
+            const lungPercent = Math.round(lungSizeScale * 100);
+            document.getElementById('lungSizePercentText').textContent = `${lungPercent}% (${lungPercent < 95 ? 'Menyusut' : 'Normal'})`;
+            document.getElementById('lungSizeBar').style.width = `${lungPercent}%`;
+
+            if (tarAccumulatedMg >= 1000) {
+                document.getElementById('tarVolumeText').textContent = `${(tarAccumulatedMg / 1000).toFixed(1)} Gram`;
+            } else {
+                document.getElementById('tarVolumeText').textContent = `${tarAccumulatedMg.toFixed(1)} mg`;
+            }
+
+            const liveAdvice = document.getElementById('liveDynamicAdvice');
+            const alveoliText = document.getElementById('alveoliStatusText');
+
+            if (healthPercentage > 75) {
+                alveoliText.textContent = "Utuh & Elastis";
+                alveoliText.className = "font-bold text-emerald-400";
+                liveAdvice.innerHTML = `<strong>Kondisi Normal (${currentScenario.toUpperCase()}):</strong> Paru-paru segar berwarna merah muda. Elastisitas jaringan terjaga sempurna.`;
+            } else if (healthPercentage > 40) {
+                alveoliText.textContent = "Terlapisi Tar/Residu";
+                alveoliText.className = "font-bold text-amber-400";
+                liveAdvice.innerHTML = `<strong>Kondisi Terkontaminasi:</strong> Endapan tar kuning kecokelatan melumuri dinding paru. Ukuran organ menyusut hingga ${lungPercent}%.`;
+            } else {
+                alveoliText.textContent = "Pecah & Emfisema";
+                alveoliText.className = "font-bold text-rose-500";
+                liveAdvice.innerHTML = `<strong>Kondisi Kritis:</strong> Paru-paru menyusut kaku (${lungPercent}%), mengelam hitam, dan kantung alveolus mengalami ruptur permanen.`;
+            }
+        }
+
+        function resetSimulation() {
+            totalPuffs = 0;
+            totalCigarettes = 0;
+            yearsSmoked = 0;
+            healthPercentage = 100;
+            lungSizeScale = 1.0;
+            tarAccumulatedMg = 0;
+            smokeParticles = [];
+            tarDeposits = [];
+            document.getElementById('sliderYears').value = 0;
+            document.getElementById('yearSliderVal').textContent = "0 Tahun";
+
+            if (isAutoPuffing) {
+                document.getElementById('toggleAutoPuff').checked = false;
+                toggleAutoPuffState(false);
+            }
+
+            updateUI();
+        }
+
+        function toggleAutoPuffState(checked) {
+            isAutoPuffing = checked;
+            if (isAutoPuffing) {
+                autoPuffInterval = setInterval(() => {
+                    triggerPuff(1);
+                    if (healthPercentage <= 0) {
+                        clearInterval(autoPuffInterval);
+                        document.getElementById('toggleAutoPuff').checked = false;
+                        isAutoPuffing = false;
+                    }
+                }, 600);
+            } else {
+                clearInterval(autoPuffInterval);
+            }
+        }
+
+        function toggleMicroscopeModal() {
+            document.getElementById('microscopeModal').classList.toggle('hidden');
+        }
+
+        function switchMicroTab(tab) {
+            activeMicroTab = tab;
+            const btnCilia = document.getElementById('microTabCilia');
+            const btnAlveolus = document.getElementById('microTabAlveolus');
+
+            if (tab === 'cilia') {
+                btnCilia.className = "px-2.5 py-1 rounded-md bg-cyan-600 text-white font-semibold transition";
+                btnAlveolus.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition";
+            } else {
+                btnAlveolus.className = "px-2.5 py-1 rounded-md bg-cyan-600 text-white font-semibold transition";
+                btnCilia.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition";
+            }
+        }
+
+        // Main Simulation Canvas Drawing Loop
+        function drawSimulation() {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            breathePhase += 0.03;
+            const breathScale = 1.0 + Math.sin(breathePhase) * (0.03 * (healthPercentage / 100));
+
+            const cigX = w * 0.15;
+            const cigY = h * 0.75;
+            const lungCenterX = w * 0.60;
+            const lungCenterY = h * 0.48;
+
+            // Tube Connection
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(cigX + 90, cigY - 5);
+            ctx.quadraticCurveTo(w * 0.36, cigY - 10, lungCenterX, lungCenterY - 90);
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = "rgba(100, 116, 139, 0.4)";
+            ctx.stroke();
+            ctx.restore();
+
+            // Device / Cigarette Render
+            ctx.save();
+            ctx.translate(cigX, cigY);
+            ctx.rotate(-0.12);
+
+            if (currentScenario === 'vape') {
+                // Render Vape Mod
+                ctx.fillStyle = '#6366f1';
+                ctx.fillRect(0, -12, 45, 24);
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillRect(45, -6, 35, 12);
+            } else {
+                // Render Cigarette Filter & Body
+                ctx.fillStyle = '#d97706';
+                ctx.fillRect(0, -8, 25, 16);
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(25, -8, 65, 16);
+
+                // Ember
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(90, 0, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+
+            // Lungs Drawing
+            ctx.save();
+            ctx.translate(lungCenterX, lungCenterY);
+            const totalScale = lungSizeScale * breathScale;
+            ctx.scale(totalScale, totalScale);
+
+            // Trachea
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(-10, -110, 20, 60);
+
+            // Left & Right Lobe Color Calculation
+            let lungColor = "#f472b6"; // healthy pink
+            if (healthPercentage < 40) lungColor = "#78350f"; // dark tar brown
+            if (healthPercentage < 18) lungColor = "#27272a"; // black
+
+            function drawLobe(side) {
+                ctx.save();
+                ctx.scale(side, 1);
+                ctx.beginPath();
+                ctx.moveTo(10, -45);
+                ctx.bezierCurveTo(60, -70, 110, -10, 90, 65);
+                ctx.bezierCurveTo(75, 110, 20, 110, 10, 80);
+                ctx.bezierCurveTo(0, 60, 0, -20, 10, -45);
+                ctx.closePath();
+
+                const grad = ctx.createRadialGradient(35, 15, 8, 35, 15, 80);
+                grad.addColorStop(0, lungColor);
+                grad.addColorStop(1, '#0f172a');
+
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            drawLobe(-1);
+            drawLobe(1);
+
+            // Render Tar spots
+            tarDeposits.forEach(spot => {
+                ctx.beginPath();
+                ctx.arc(spot.x, spot.y, spot.radius, 0, Math.PI * 2);
+                ctx.fillStyle = healthPercentage < 30 ? '#000000' : '#451a03';
+                ctx.globalAlpha = 0.8;
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            });
+
+            ctx.restore();
+
+            // Render Particles
+            for (let i = smokeParticles.length - 1; i >= 0; i--) {
+                const p = smokeParticles[i];
+                p.update();
+                p.draw(ctx);
+                if (p.alpha <= 0 || p.progress >= 1.2) {
+                    smokeParticles.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(drawSimulation);
+        }
+
+        // Microscope Animation Loop
+        function drawMicroscopeView() {
+            if (!microCtx || !microCanvas) return;
+            microCtx.clearRect(0, 0, microCanvas.width, microCanvas.height);
+
+            const mw = microCanvas.width;
+            const mh = microCanvas.height;
+
+            const badge = document.getElementById('microStatusBadge');
+            const desc = document.getElementById('microDesc');
+
+            if (activeMicroTab === 'cilia') {
+                if (healthPercentage > 60) {
+                    badge.textContent = "Silia Aktif & Sehat";
+                    badge.className = "inline-block px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 mb-1";
+                    desc.textContent = "Silia bergerak aktif menyapu dahak dan kotoran keluar dari saluran pernapasan.";
+                } else if (healthPercentage > 25) {
+                    badge.textContent = "Silia Melambat & Termelumuri Tar";
+                    badge.className = "inline-block px-3 py-0.5 rounded-full text-xs font-bold bg-amber-950 text-amber-400 border border-amber-800 mb-1";
+                    desc.textContent = "Tar melumuri permukaan silia, membuat gerakannya melambat dan kotoran terperangkap.";
+                } else {
+                    badge.textContent = "Silia Lumpuh & Mati";
+                    badge.className = "inline-block px-3 py-0.5 rounded-full text-xs font-bold bg-rose-950 text-rose-400 border border-rose-800 mb-1";
+                    desc.textContent = "Silia rontok dan mati total! Paru-paru kehilangan sistem pembersih alami.";
+                }
+
+                // Render epithelial base & cilia hairs
+                microCtx.fillStyle = '#334155';
+                microCtx.fillRect(0, mh - 35, mw, 35);
+
+                const ciliaCount = 45;
+                const ciliaSpeed = (healthPercentage / 100) * 0.08;
+                const waveTime = Date.now() * ciliaSpeed * 0.05;
+
+                for (let i = 0; i < ciliaCount; i++) {
+                    const cx = (i / ciliaCount) * mw + 5;
+                    const cy = mh - 35;
+                    const isDead = healthPercentage < 25;
+                    const hairLength = isDead ? 10 : 32;
+                    const wave = isDead ? 0 : Math.sin(waveTime + i * 0.4) * 12;
+
+                    microCtx.beginPath();
+                    microCtx.moveTo(cx, cy);
+                    microCtx.quadraticCurveTo(cx + wave * 0.5, cy - hairLength * 0.5, cx + wave, cy - hairLength);
+                    microCtx.lineWidth = 3;
+                    microCtx.strokeStyle = isDead ? '#451a03' : healthPercentage < 60 ? '#d97706' : '#38bdf8';
+                    microCtx.stroke();
+                }
+            } else {
+                // Alveolus Render
+                if (healthPercentage > 60) {
+                    badge.textContent = "Alveolus Utuh & Elastis";
+                    badge.className = "inline-block px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 mb-1";
+                    desc.textContent = "Kantung alveolus elastis membesar dan mengecil secara optimal untuk menyerap Oksigen.";
+                } else {
+                    badge.textContent = "Alveolus Pecah & Emfisema";
+                    badge.className = "inline-block px-3 py-0.5 rounded-full text-xs font-bold bg-rose-950 text-rose-400 border border-rose-800 mb-1";
+                    desc.textContent = "Dinding sekat alveolar hancur & menyatu menjadi rongga kaku yang tidak efisien!";
+                }
+
+                const clusters = [
+                    { x: mw * 0.3, y: mh * 0.5, r: 35 },
+                    { x: mw * 0.5, y: mh * 0.45, r: 40 },
+                    { x: mw * 0.7, y: mh * 0.55, r: 32 }
+                ];
+
+                clusters.forEach(cl => {
+                    microCtx.beginPath();
+                    microCtx.arc(cl.x, cl.y, cl.r, 0, Math.PI * 2);
+                    microCtx.fillStyle = healthPercentage > 60 ? '#db2777' : '#451a03';
+                    microCtx.fill();
+                    microCtx.lineWidth = 2;
+                    microCtx.strokeStyle = '#f472b6';
+                    microCtx.stroke();
+                });
+            }
+
+            requestAnimationFrame(drawMicroscopeView);
+        }
+
+        // Case Hint Checker
+        function checkCaseHint(id) {
+            document.getElementById(`hintCase${id}`).classList.remove('hidden');
+        }
+
+        // Quiz Evaluation Checker
+        function answerQuiz(qNum, choice) {
+            const feedback = document.getElementById(`quizFeedback${qNum}`);
+            feedback.classList.remove('hidden');
+
+            const correctAnswers = {
+                1: { answer: 'B', text: "✓ BENAR! Tar adalah residu cair beracun berwarna kuning kecokelatan yang mengendap pada jaringan paru-paru." },
+                2: { answer: 'B', text: "✓ BENAR! Kelumpuhan silia menyebabkan kotoran dan dahak tidak dapat disapu keluar dari saluran pernapasan." },
+                3: { answer: 'A', text: "✓ BENAR! Emfisema merusak dinding sekat alveolus sehingga mengurangi efisiensi pertukaran oksigen." },
+                4: { answer: 'A', text: "✓ BENAR! Asap sampingan (sidestream smoke) mengandung konsentrasi racun yang sangat tinggi saat dihirup perokok pasif." },
+                5: { answer: 'B', text: "✓ BENAR! Karbon Monoksida (CO) memiliki daya ikat terhadap hemoglobin ~200x lebih kuat dibanding Oksigen." }
+            };
+
+            const item = correctAnswers[qNum];
+            if (choice === item.answer) {
+                feedback.textContent = item.text;
+                feedback.className = "font-bold text-xs text-emerald-400 pt-1";
+            } else {
+                feedback.textContent = `✕ KURANG TEPAT. Jawaban yang benar adalah ${item.answer}.`;
+                feedback.className = "font-bold text-xs text-rose-400 pt-1";
+            }
+        }
+
+        window.onload = function() {
+            canvas = document.getElementById('simCanvas');
+            ctx = canvas ? canvas.getContext('2d') : null;
+            microCanvas = document.getElementById('microCanvas');
+            microCtx = microCanvas ? microCanvas.getContext('2d') : null;
+
+            resizeCanvas();
+            if (ctx) drawSimulation();
+            if (microCtx) drawMicroscopeView();
+            updateUI();
+        };
+    </script>
+</body>
+</html>
